@@ -7,7 +7,7 @@ import {
   StyleSheet,
   View, 
 } from 'react-native';
-
+import { url } from '../assets/store.js';
 import { Hoshi } from 'react-native-textinput-effects';
 
 export default class SignInScreen extends React.Component {
@@ -72,22 +72,25 @@ export default class SignInScreen extends React.Component {
   }
 
   _signInAsync = async () => {
-    await fetch('https://gentle-depths-43328.herokuapp.com/session/create', {
+    await fetch(url+'/session/create', {
       method: 'POST',
       headers: {
-        'MobileApp': 'y',
+        'user-agent': 'mobile-app',
       },
       body: JSON.stringify({
         username: this.state.username,
         password: this.state.password,
       }),
     })
-      .then((err, body, res)=>{console.log(err)})
+      .then((res)=>{
+        if(res.status == 200){
+          AsyncStorage.setItem('userToken', 'abc');
+          this.props.navigation.navigate('Main');
+        }
+      })
       .catch((error)=>{
         console.log('There has been a problem with your fetch operation: ' + error);
       });
-    //await AsyncStorage.setItem('userToken', 'abc');
-    //this.props.navigation.navigate('Main');
   };
 }
 

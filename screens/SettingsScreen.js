@@ -10,12 +10,19 @@ import { withNavigation } from 'react-navigation';
 class SettingsScreen extends React.Component {
   static navigationOptions = {
     title: 'Profile',
+    headerStyle: {
+      backgroundColor: '#6C6656cf'
+    },headerTitleStyle: {
+      color:'#fff',
+      fontSize: 24,
+      fontWeight: 'bold',
+    },
   };
 
   render() {
     return(
         <View style={styles.container}>
-            <Button title="Exit!" onPress={this._signOutAsync} />
+            <Button title="Exit!" color='#FFBC55' onPress={this._signOutAsync} />
         </View>
     );
   }
@@ -27,7 +34,7 @@ class SettingsScreen extends React.Component {
 const styles = StyleSheet.create({
     container:{
         flex: 1,
-        backgroundColor: '#ededf8',
+        backgroundColor: '#FFD663',
     }
 });
 export default withNavigation(SettingsScreen);
