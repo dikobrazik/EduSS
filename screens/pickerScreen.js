@@ -1,26 +1,23 @@
 import React from 'react';
 import {
+  FlatList,
   ListView,
   StyleSheet,
   Text,
   View,
 } from 'react-native';
-
-import {ListItem} from 'react-native-elements';
+import { url } from '../assets/store.js';
+import {Icon, ListItem} from 'react-native-elements';
 
 export default class HomeScreen extends React.Component {
   constructor(props){
     super(props);
     const list = [
       {
-        name: 'Amy Farha',
-        avatar_url: 'https://s3.amazonaws.com/uifaces/faces/twitter/ladylexy/128.jpg',
-        subtitle: 'Vice President'
+        name: '1234',
       },
       {
-        name: 'Chris Jackson',
-        avatar_url: 'https://s3.amazonaws.com/uifaces/faces/twitter/adhamdannaway/128.jpg',
-        subtitle: 'Vice Chairman'
+        name: '0000',
       },
     ];
     const ds = new ListView.DataSource({rowHasChanged: (r1, r2) => r1 !== r2});
@@ -40,19 +37,39 @@ export default class HomeScreen extends React.Component {
       fontWeight: 'bold',
     }
   };
-
+  _getGroupsList = async () => {
+    await fetch(url+'/session/create', {
+      method: 'POST',
+      headers: {
+        'user-agent': 'mobile-app',
+      },
+      body: JSON.stringify({
+        username: this.state.username,
+        password: this.state.password,
+      }),
+    }).then((res)=>{
+        if(res.status == 200){
+          AsyncStorage.setItem('userToken', 'abc');
+          this.props.navigation.navigate('Main');
+        }
+      })
+      .catch((error)=>{
+        console.log('There has been a problem with your fetch operation: ' + error);
+      });
+  };
   render() {
     return (
       <View style={styles.container}>
         <View>
           {
-            this.state.list.map((l, i) => (
+            this.state.list.map((item, i)=>(
               <ListItem
                 key={i}
-                title={l.name}
-                subtitle={l.subtitle}
+                title={item.name}
+                titleStyle={{fontSize:16, fontWeight:'500'}}
+                chevronColor="white"
                 onPress={()=>{
-                  this.props.navigation.state.params.returnData('123');
+                  this.props.navigation.state.params.returnData(item.name);
                   this.props.navigation.goBack();
                 }}
               />

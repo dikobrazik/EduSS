@@ -49,7 +49,31 @@ export default class HomeScreen extends React.Component {
     if(this.state.group) {}
 
   }
-  
+  _chooseData = async() =>{
+    if(Platform.OS === 'ios'){
+      <View style={styles.container}>
+        <DatePickerIOS
+          date={this.state.chosenDate}
+          onDateChange={this.setDate}
+        />
+      </View>
+    }else{
+      try {
+        const {action, year, month, day} = await DatePickerAndroid.open({
+          date: new Date()
+        });
+        if (action !== DatePickerAndroid.dismissedAction) {
+          // Selected year, month (0-11), day
+        }
+        if (action == DatePickerAndroid.dateSetAction){
+          if(month<9) this.setState({date:day+'.0'+(month+1)+'.'+year})
+          else this.setState({date:day+'.'+(month+1)+'.'+year})
+        }
+      } catch ({code, message}) {
+        console.warn('Cannot open date picker', message);
+      }
+    }
+  }
   render() {
     const {navigate} = this.props.navigation;
     const groupChooseIcon = <Icon size={30} underlayColor='#6C665677' name='torsos-all' type='foundation'
@@ -62,6 +86,9 @@ export default class HomeScreen extends React.Component {
       </Text>
     return (
       <View style={styles.container}>
+        {/*
+          *  Строки изменения даты
+        */}
         <View style={{flexDirection:'row',borderBottomWidth:1, justifyContent:'space-between', paddingVertical:10}}>
             <View style={{flex:1}}>
             </View>
@@ -82,33 +109,12 @@ export default class HomeScreen extends React.Component {
               justifyContent:'flex-end', 
             }}>
               <Icon size={30} underlayColor='#6C665677' name='calendar-edit' type='material-community'
-                 onPress={async () => {
-                if(Platform.OS === 'ios'){
-                    <View style={styles.container}>
-                      <DatePickerIOS
-                        date={this.state.chosenDate}
-                        onDateChange={this.setDate}
-                      />
-                    </View>
-                }else{
-                  try {
-                    const {action, year, month, day} = await DatePickerAndroid.open({
-                      date: new Date()
-                    });
-                    if (action !== DatePickerAndroid.dismissedAction) {
-                      // Selected year, month (0-11), day
-                    }
-                    if (action == DatePickerAndroid.dateSetAction){
-                      if(month<9) this.setState({date:day+'.0'+(month+1)+'.'+year})
-                      else this.setState({date:day+'.'+(month+1)+'.'+year})
-                    }
-                  } catch ({code, message}) {
-                    console.warn('Cannot open date picker', message);
-                  }
-                }
-              }}/>
+                 onPress={async () => {this._chooseData()}}/>
             </View>
         </View>
+        {/*
+          *  Choose the group number...
+        */}
         <View style={{flex:1, backgroundColor:'#fff'}}>
           <View style={{flexDirection:'row', marginTop:5, borderBottomWidth:1}}>
             <View style={{}}>
@@ -118,7 +124,6 @@ export default class HomeScreen extends React.Component {
             </View>
             <View style={{flex:1, alignItems:'center', justifyContent:'center'}}>
               {this.state.group?groupNumber:groupChooseIcon}
-              
             </View>
           </View>
           <View style={{flex:1}}>
