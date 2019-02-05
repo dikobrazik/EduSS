@@ -72,7 +72,7 @@ export default class SignInScreen extends React.Component {
   }
 
   _signInAsync = async () => {
-    await fetch(url+'/session/create', {
+    await fetch('http://192.168.1.100:1337/session/create', {
       method: 'POST',
       headers: {
         'user-agent': 'mobile-app',
@@ -87,7 +87,9 @@ export default class SignInScreen extends React.Component {
           AsyncStorage.setItem('userToken', 'abc');
           this.props.navigation.navigate('Main');
         }
+        return res.json()
       })
+      .then(res => AsyncStorage.setItem('userId', res.id))
       .catch((error)=>{
         console.log('There has been a problem with your fetch operation: ' + error);
       });

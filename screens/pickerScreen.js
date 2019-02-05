@@ -1,30 +1,26 @@
 import React from 'react';
 import {
+  AsyncStorage,
   FlatList,
   ListView,
   StyleSheet,
   Text,
   View,
 } from 'react-native';
-import { url } from '../assets/store.js';
-import {Icon, ListItem} from 'react-native-elements';
+import axios from 'axios';
+//import { url } from '../assets/store.js';
+import { Icon, ListItem } from 'react-native-elements';
 
 export default class HomeScreen extends React.Component {
   constructor(props){
     super(props);
-    const list = [
-      {
-        name: '1234',
-      },
-      {
-        name: '0000',
-      },
-    ];
+    
     const ds = new ListView.DataSource({rowHasChanged: (r1, r2) => r1 !== r2});
     this.state = {
       dataSource: ds.cloneWithRows(['row 1', 'row 2']),
-      list:list,
+      list:[],
     };
+    this._getGroupsList();
   }
   
   static navigationOptions = {
@@ -38,24 +34,10 @@ export default class HomeScreen extends React.Component {
     }
   };
   _getGroupsList = async () => {
-    await fetch(url+'/session/create', {
-      method: 'POST',
-      headers: {
-        'user-agent': 'mobile-app',
-      },
-      body: JSON.stringify({
-        username: this.state.username,
-        password: this.state.password,
-      }),
-    }).then((res)=>{
-        if(res.status == 200){
-          AsyncStorage.setItem('userToken', 'abc');
-          this.props.navigation.navigate('Main');
-        }
-      })
-      .catch((error)=>{
-        console.log('There has been a problem with your fetch operation: ' + error);
-      });
+    let id = await AsyncStorage.getItem('userId');
+    axios
+    .get('http://192.168.1.100:1337/edu/groups', {params:{id:id}})
+    .then(response => {this.setState({list:response.data})});
   };
   render() {
     return (
