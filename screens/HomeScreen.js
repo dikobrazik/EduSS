@@ -1,9 +1,12 @@
 import React from 'react';
 import {
+  AsyncStorage,
   Button,
+  //CheckBox,
   DatePickerAndroid,
   DatePickerIOS,
   Image,
+  FlatList,
   Picker,
   Platform,
   ScrollView,
@@ -12,8 +15,8 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-
-import {Icon} from 'react-native-elements';
+import MyListItem from '../components/GroupList'
+import {CheckBox,Icon, ListItem} from 'react-native-elements';
 
 export default class HomeScreen extends React.Component {
   constructor(props){
@@ -22,7 +25,9 @@ export default class HomeScreen extends React.Component {
       language:'',
       date:this._currentDate(),
       group:'',
+      groupList:[],
     };
+    this._getGroupList('3321');
   }
   
   static navigationOptions = {
@@ -44,10 +49,15 @@ export default class HomeScreen extends React.Component {
   }
   returnData(group) {
     this.setState({group: group});
+    this._getGroupList(group);
   }
   componentDidMount() {
     if(this.state.group) {}
 
+  }
+  _getGroupList = async (group) => {
+    let url = await AsyncStorage.getItem('url') + '/groups/list?index='+group;
+    await fetch(url).then(res=>res.json()).then(res=>this.setState({groupList:JSON.parse(res[0].content)}))
   }
   _chooseData = async() =>{
     if(Platform.OS === 'ios'){
@@ -74,6 +84,33 @@ export default class HomeScreen extends React.Component {
       }
     }
   }
+  _keyExtractor = (item, index) => String(index);
+
+  _onPressItem = (id: string) => {
+    // updater functions are preferred for transactional updates
+    this.setState((state) => {
+      // copy the map rather than modifying state.
+      const selected = new Map(state.selected);
+      selected.set(id, !selected.get(id)); // toggle
+      return {selected};
+    });
+  };
+  _onCheckItem = (index) => {
+    // updater functions are preferred for transactional updates
+    this.setState((state)=>{
+      state.groupList[Number(index)].checked = !state.groupList[Number(index)].checked;
+    });
+  };
+  _renderItem = ({item, i}) => (
+    <MyListItem
+      key={i}
+      id={this.state.groupList.indexOf(item)}
+      onPressItem={this._onPressItem}
+      onCheckItem={this._onCheckItem}
+      title={item.name + ' ' + item.surname}
+    />
+  );
+
   render() {
     const {navigate} = this.props.navigation;
     const groupChooseIcon = <Icon size={30} underlayColor='#6C665677' name='torsos-all' type='foundation'
@@ -127,8 +164,15 @@ export default class HomeScreen extends React.Component {
             </View>
           </View>
           <View style={{flex:1}}>
+            { <FlatList
+              data={this.state.groupList}
+              extraData={this.state}
+              keyExtractor={this._keyExtractor}
+              renderItem={this._renderItem}
+            />}
           </View>
         </View>
+        <Button title="Get" onPress={()=>{console.log(this.state)}} />
       </View>
     );
   }
@@ -140,6 +184,14 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#FFD663',
   },
+  listItem:{
+    flex:1, 
+    flexDirection:'row',
+    backgroundColor:'#fff', 
+    borderBottomWidth:2,
+    borderBottomColor:'#6C6656cf',
+    height:50,
+  }
 });
 /*
 BCKG -   FFD663

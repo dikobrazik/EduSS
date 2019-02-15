@@ -1,28 +1,23 @@
 import React from 'react';
 import {
   AsyncStorage,
-  FlatList,
-  ListView,
+  ScrollView,
   StyleSheet,
-  Text,
   View,
 } from 'react-native';
 import axios from 'axios';
-//import { url } from '../assets/store.js';
-import { Icon, ListItem } from 'react-native-elements';
+
+import {Avatar, Icon, ListItem } from 'react-native-elements';
 
 export default class HomeScreen extends React.Component {
   constructor(props){
     super(props);
-    
-    const ds = new ListView.DataSource({rowHasChanged: (r1, r2) => r1 !== r2});
     this.state = {
-      dataSource: ds.cloneWithRows(['row 1', 'row 2']),
       list:[],
     };
     this._getGroupsList();
   }
-  
+
   static navigationOptions = {
     title: 'Header',
     headerStyle: {
@@ -35,29 +30,37 @@ export default class HomeScreen extends React.Component {
   };
   _getGroupsList = async () => {
     let id = await AsyncStorage.getItem('userId');
+    let url = await AsyncStorage.getItem('url') + '/edu/groups';
     axios
-    .get('http://192.168.1.100:1337/edu/groups', {params:{id:id}})
-    .then(response => {this.setState({list:response.data})});
+    .get(url, {params:{id:id}})
+    .then(response => this.setState({list:response.data}));
   };
   render() {
     return (
       <View style={styles.container}>
-        <View>
+        <ScrollView>
           {
             this.state.list.map((item, i)=>(
               <ListItem
                 key={i}
-                title={item.name}
-                titleStyle={{fontSize:16, fontWeight:'500'}}
+                containerStyle={{borderBottomWidth:1, borderBottomColor:'#FFDa66'}}
+                leftAvatar={<Avatar rounded icon={{ name:'torsos-all', type:'foundation' }}/>}
+                title={item.gNum}
+                titleStyle={{fontSize:18, fontWeight:'700'}}
+                rightTitle={'Номер пары: '+(Number(item.number)+1)}
+                rightTitleStyle={{color:'#444', width:150}}
+                chevron
                 chevronColor="white"
                 onPress={()=>{
-                  this.props.navigation.state.params.returnData(item.name);
+                  this.props.navigation.state.params.returnData(item.gNum);
+                  AsyncStorage.setItem('subjId', item.id)
+                  AsyncStorage.setItem('groupNumber', item.gNum)
                   this.props.navigation.goBack();
                 }}
               />
             ))
           }
-        </View>
+        </ScrollView>
       </View>
     );
   }
@@ -68,5 +71,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#FFD663',
+    //backgroundColor: '#FFF',
   },
 });

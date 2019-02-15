@@ -7,7 +7,7 @@ import {
   StyleSheet,
   View, 
 } from 'react-native';
-import { url } from '../assets/store.js';
+
 import { Hoshi } from 'react-native-textinput-effects';
 
 export default class SignInScreen extends React.Component {
@@ -72,7 +72,8 @@ export default class SignInScreen extends React.Component {
   }
 
   _signInAsync = async () => {
-    await fetch('http://192.168.1.100:1337/session/create', {
+    let url = await AsyncStorage.getItem('url') + '/session/create'
+    await fetch(url, {
       method: 'POST',
       headers: {
         'user-agent': 'mobile-app',
